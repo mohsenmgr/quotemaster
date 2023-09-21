@@ -25,8 +25,7 @@ class QuoteMaster(object):
         options = Options()
         options.add_argument("--headless")
 
-        driver = webdriver.Chrome(service=Service(
-            ChromeDriverManager().install()), options=options)
+        driver = webdriver.Chrome(service=Service(), options=options)
 
         PATH = r"./chrome_driver/chromedriver_mac64"
 
@@ -46,7 +45,7 @@ class QuoteMaster(object):
 
         record = types.SimpleNamespace()
 
-        index = 1
+        index = self.getLastIndex() + 1
         for quote, author in zip(quotes, authors):
             quote_clean = quote.get_attribute("innerText")
             # print(quote_clean)
@@ -90,6 +89,20 @@ class QuoteMaster(object):
         finally:
             if conn:
                 conn.close()
+
+
+    def getLastIndex(self):
+        conn = sqlite3.connect('mydb.db')
+        c = conn.cursor()
+
+        c.execute('''
+                SELECT COALESCE(MAX(quote_id), 0) 
+                FROM quotes 
+                ''')
+        max_quote_id = c.fetchone()[0]
+        return max_quote_id
+
+
 
     def fetch_from_db(self):
         conn = sqlite3.connect('mydb.db')
